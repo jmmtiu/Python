@@ -60,22 +60,54 @@ for i in range(nodeCount):
     sortedNodeList.append(next(node for node in unsortedNodeList if node.id == nodeList[i]))
 
 
-#Generate output file
-outputFile = open("coordList.csv", "w")
-outputFile.write("lon,lat\n")
+#Create new long and lat list
 longList = []
 latList = []
 
 for i in range(nodeCount):
-    outputFile.write("{},{}\n".format(sortedNodeList[i].lon,sortedNodeList[i].lat))
-    longList.append(sortedNodeList[i].lon)
-    latList.append(sortedNodeList[i].lat)
+    longList.append(float(sortedNodeList[i].lon))
+    latList.append(float(sortedNodeList[i].lat))
 
 
-#Plot long, lat data
+#Populating sparse sections
+import numpy as np
+#Save old lat and long list
+oldLon = longList
+oldLat = latList
+
+#1 degree = 111,139m
+maxDist = (50/2)/111139 #degrees
+
+i = 0
+while i < len(longList) - 1:
+    dist = ((longList[i+1]-longList[i])**2 + (latList[i+1]-latList[i])**2)**(0.5)
+
+    #Populate section between nodes if distance is larger than max distance
+    if dist >= maxDist:
+        newNodeCount = int(round(dist/maxDist)) + 2
+
+        newNodeLon = np.linspace(longList[i], longList[i+1], newNodeCount)
+        newNodeLat = np.linspace(latList[i], latList[i+1], newNodeCount)
+        
+        longList[i+1:i+1] = newNodeLon[1:-1]
+        latList[i+1:i+1] = newNodeLat[1:-1]
+
+    i += 1
+
+
+#Generate output file
+outputFile = open("coordList.csv", "w")
+outputFile.write("lon,lat\n")
+
+for i in range(len(longList)):
+    outputFile.write("{},{}\n".format(longList[i],latList[i]))
+
+
+#Plot output
 import matplotlib.pyplot as plt
-
-plt.plot(longList, latList)
+plt.plot(longList, latList, marker='.', markersize=2)
+plt.plot(oldLon, oldLat, linestyle='--')
 plt.xlabel("Longitude")
 plt.ylabel("Latitude")
+plt.axis('equal')
 plt.show()
