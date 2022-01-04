@@ -1,5 +1,7 @@
 # Python
 
+Some small side projects using Python
+
 PathNodes.py
 - Uses the Project OSMR route service to generate a list of nodes along a given set of coordinates that gives the most optimal route.
 - It then generates  a lat,lon coordinate list for the path using the Overpass API.
